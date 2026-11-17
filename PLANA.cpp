@@ -55,232 +55,6 @@ string readText(const string& prompt) {
     }
 }
 
-// LAB 1: THE SHRINKING ARCHIVE - shrink a heap array by one slot.
-void pop_back_dynamic(int*& arr, int& size) {
-    if (size <= 0 || arr == nullptr) return;
-    int newSize = size - 1;
-    int* smaller = (newSize > 0) ? new int[newSize] : nullptr;
-    for (int i = 0; i < newSize; ++i) smaller[i] = arr[i];
-    delete[] arr;
-    arr = smaller;
-    size = newSize;
-}
-void lab1() {
-    cout << "\nLAB 1 - THE SHRINKING ARCHIVE\n";
-    int size = 4;
-    int* data = new int[size]{10, 20, 30, 40};
-    cout << "Before shrinking (Size " << size << "): ";
-    for (int i=0; i<size; ++i) cout << data[i] << " ";
-    cout << "\n";
-    pop_back_dynamic(data, size);
-    cout << "After shrinking (Size " << size << "): ";
-    for (int i=0; i<size; ++i) cout << data[i] << " ";
-    cout << "\n";
-    delete[] data;
-}
-
-// LAB 2: SINGLY LINKED LIST - getLastElement returns -1 if empty.
-struct SingleNode {
-    int data; SingleNode* next;
-    explicit SingleNode(int v): data(v), next(nullptr) {}
-};
-class SinglyLinkedList {
-    SingleNode* head = nullptr;
-public:
-    void insertAtEnd(int v) {
-        SingleNode* n = new SingleNode(v);
-        if (!head) { head=n; return; }
-        SingleNode* cur=head;
-        while (cur->next) cur=cur->next;
-        cur->next=n;
-    }
-    int getLastElement() const {
-        if (!head) return -1;
-        SingleNode* cur=head;
-        while (cur->next) cur=cur->next;
-        return cur->data;
-    }
-    void display() const {
-        SingleNode* cur=head;
-        cout << "HEAD -> ";
-        while (cur) { cout << cur->data << " -> "; cur=cur->next; }
-        cout << "NULL\n";
-    }
-    ~SinglyLinkedList() {
-        while (head) { SingleNode* n=head->next; delete head; head=n; }
-    }
-};
-void lab2() {
-    cout << "\nLAB 2 - THE LAST CAR LOCATOR\n";
-    SinglyLinkedList train;
-    train.insertAtEnd(10); train.insertAtEnd(20); train.insertAtEnd(30);
-    train.display();
-    cout << "Last element: " << train.getLastElement() << "\n";
-    SinglyLinkedList empty;
-    cout << "Empty list returns: " << empty.getLastElement() << "\n";
-}
-
-// LAB 3: DOUBLY LINKED LIST AND CIRCULAR LINKED LIST.
-struct DoubleNode {
-    int data; DoubleNode *next, *prev;
-    explicit DoubleNode(int v): data(v), next(nullptr), prev(nullptr) {}
-};
-class DoublyLinkedList {
-    DoubleNode *head=nullptr, *tail=nullptr;
-public:
-    void insertAtEnd(int v) {
-        DoubleNode* n=new DoubleNode(v); n->prev=tail;
-        if (!head) { head=tail=n; return; }
-        tail->next=n; tail=n;
-    }
-    void printForward() const {
-        DoubleNode* p=head; cout << "Forward: NULL <-> ";
-        while(p) { cout << "[" << p->data << "] <-> "; p=p->next; }
-        cout << "NULL\n";
-    }
-    void printBackward() const {
-        DoubleNode* p=tail; cout << "Backward: NULL <-> ";
-        while(p) { cout << "[" << p->data << "] <-> "; p=p->prev; }
-        cout << "NULL\n";
-    }
-    ~DoublyLinkedList() {
-        while(head) { DoubleNode* n=head->next; delete head; head=n; }
-    }
-};
-struct CircularNode {
-    int data; CircularNode* next;
-    explicit CircularNode(int v): data(v), next(nullptr) {}
-};
-class CircularLinkedList {
-    CircularNode *head=nullptr, *tail=nullptr;
-public:
-    void insertAtEnd(int v) {
-        CircularNode* n=new CircularNode(v);
-        if(!head) { head=tail=n; n->next=head; return; }
-        tail->next=n; tail=n; tail->next=head;
-    }
-    void displayOneRound() const {
-        if(!head) { cout << "Empty circular list\n"; return; }
-        CircularNode* p=head; cout << "HEAD -> ";
-        do { cout << p->data << " -> "; p=p->next; } while(p!=head);
-        cout << "(back to HEAD)\n";
-    }
-    ~CircularLinkedList() {
-        if(!head) return;
-        tail->next=nullptr;
-        while(head) { CircularNode* n=head->next; delete head; head=n; }
-    }
-};
-void lab3() {
-    cout << "\nLAB 3 - DOUBLY AND CIRCULAR LINKED LISTS\n";
-    DoublyLinkedList d; d.insertAtEnd(10); d.insertAtEnd(20); d.insertAtEnd(30);
-    d.printForward(); d.printBackward();
-    CircularLinkedList c; c.insertAtEnd(1); c.insertAtEnd(2); c.insertAtEnd(3);
-    cout << "Circular list: "; c.displayOneRound();
-}
-
-// LAB 4: BALANCED PARENTHESES USING STACK.
-bool isBalanced(const string& expr) {
-    stack<char> s;
-    for(char ch: expr) {
-        if(ch=='(') s.push(ch);
-        else if(ch==')') {
-            if(s.empty()) return false;
-            s.pop();
-        }
-    }
-    return s.empty();
-}
-void lab4() {
-    cout << "\nLAB 4 - BALANCED PARENTHESES CHECKER\n";
-    for(const string& x: vector<string>{"(())", "(()", "())"})
-        cout << x << " -> " << (isBalanced(x)?"Valid":"Invalid") << "\n";
-}
-
-// LAB 5 & LAB 6: BST INSERTION, TRAVERSALS, AND SEARCH.
-struct BSTNode {
-    int data; BSTNode *left, *right;
-    explicit BSTNode(int v): data(v), left(nullptr), right(nullptr) {}
-};
-class BinarySearchTree {
-    BSTNode* root=nullptr;
-    BSTNode* insertRec(BSTNode* p,int v) {
-        if(!p) return new BSTNode(v);
-        if(v<p->data) p->left=insertRec(p->left,v);
-        else if(v>p->data) p->right=insertRec(p->right,v);
-        return p;
-    }
-    bool searchRec(BSTNode* p,int target) const {
-        if(!p) return false;
-        if(p->data==target) return true;
-        if(target<p->data) return searchRec(p->left,target);
-        return searchRec(p->right,target);
-    }
-    void in(BSTNode* p) const { if(p){in(p->left);cout<<p->data<<" ";in(p->right);} }
-    void pre(BSTNode* p) const { if(p){cout<<p->data<<" ";pre(p->left);pre(p->right);} }
-    void post(BSTNode* p) const { if(p){post(p->left);post(p->right);cout<<p->data<<" ";} }
-    void clear(BSTNode* p) {
-        if (!p) return;
-        clear(p->left);
-        clear(p->right);
-        delete p;
-    }
-public:
-    void insert(int v) { root=insertRec(root,v); }
-    bool search(int v) const { return searchRec(root,v); }
-    void traversals() const {
-        cout << "Inorder: "; in(root);
-        cout << "\nPreorder: "; pre(root);
-        cout << "\nPostorder: "; post(root); cout << "\n";
-    }
-    ~BinarySearchTree(){ clear(root); }
-};
-void lab5and6() {
-    cout << "\nLAB 5 - BST / LAB 6 - SEARCH FINDER\n";
-    BinarySearchTree bst;
-    for(int v: vector<int>{50,30,70,20,40,60,80}) bst.insert(v);
-    bst.traversals();
-    cout << "Search 30: " << (bst.search(30)?"Found":"Not Found") << "\n";
-    cout << "Search 90: " << (bst.search(90)?"Found":"Not Found") << "\n";
-}
-
-// LAB 7: BINARY SEARCH COMPARISON COUNTER.
-int countBinarySteps(const int arr[], int size, int target) {
-    int low=0, high=size-1, steps=0;
-    while(low<=high) {
-        int mid=low+(high-low)/2;
-        ++steps;
-        if(arr[mid]==target) return steps;
-        if(target<arr[mid]) high=mid-1;
-        else low=mid+1;
-    }
-    return steps;
-}
-void lab7() {
-    cout << "\nLAB 7 - THE STEP-COUNTER SHOWDOWN\n";
-    int data[]={2,5,8,12,16,23,38,56,72,91,100,105,110,120,130,140};
-    cout << "Steps to find 110: " << countBinarySteps(data,16,110) << "\n";
-}
-
-// LAB 8: INSERTION SORT SCORES IN DESCENDING ORDER.
-void rankLeaderboard(vector<int>& scores) {
-    for(int i=1;i<(int)scores.size();++i) {
-        int key=scores[i], j=i-1;
-        while(j>=0 && scores[j]<key) { scores[j+1]=scores[j]; --j; }
-        scores[j+1]=key;
-    }
-}
-void lab8() {
-    cout << "\nLAB 8 - LEADERBOARD RANKING ENGINE\n";
-    vector<int> scores={450,1200,890,2300,150,990};
-    rankLeaderboard(scores);
-    for(size_t i=0;i<scores.size();++i)
-        cout << "Rank #" << i+1 << ": " << scores[i] << " pts\n";
-}
-void runAllLabs() {
-    lab1(); lab2(); lab3(); lab4(); lab5and6(); lab7(); lab8();
-}
-
 // E-COMMERCE PRODUCT DATA: 4 sports/apparel brands.
 vector<Product> products={
     {101,"Air Force 1","Footwear","Nike",5500,10},
@@ -397,28 +171,6 @@ void sortCatalog() {
     sort(products.begin(),products.end(),[](const Product&a,const Product&b){return a.price<b.price;});
     showProducts();
 }
-void labsMenu() {
-    int c;
-    do {
-        cout<<"\n===== LAB PRACTICE =====\n"
-            <<"1 Lab 1 - Dynamic Array Shrinking\n"
-            <<"2 Lab 2 - Singly Linked List Last Element\n"
-            <<"3 Lab 3 - Doubly and Circular Linked Lists\n"
-            <<"4 Lab 4 - Balanced Parentheses Stack\n"
-            <<"5 Lab 5 - BST Insertion and Traversals\n"
-            <<"6 Lab 6 - BST Search Finder\n"
-            <<"7 Lab 7 - Binary Search Step Counter\n"
-            <<"8 Lab 8 - Insertion Sort Leaderboard\n"
-            <<"9 Run All Labs\n0 Back\n";
-        c=readInt("Choose: ");
-        switch(c){
-            case 1:lab1();break; case 2:lab2();break; case 3:lab3();break;
-            case 4:lab4();break; case 5:lab5and6();break; case 6:lab5and6();break;
-            case 7:lab7();break; case 8:lab8();break; case 9:runAllLabs();break;
-            case 0:break; default:cout<<"Invalid choice.\n";
-        }
-    }while(c!=0);
-}
 
 int main() {
     int choice;
@@ -438,7 +190,6 @@ int main() {
             <<"9. View Pending Checkout Orders\n"
             <<"10. Sort Catalog by Price\n"
             <<"11. View Admin Action History (Stack)\n"
-            <<"12. Demonstrate Labs 1-8\n"
             <<"0. Exit\n"
             <<"====================================================\n";
         choice=readInt("Enter your choice: ");
@@ -454,7 +205,6 @@ int main() {
             case 9:viewOrders();break;
             case 10:sortCatalog();break;
             case 11:viewHistory();break;
-            case 12:labsMenu();break;
             case 0:cout<<"Thank you for using the store system.\n";break;
             default:cout<<"Invalid menu option.\n";
         }
